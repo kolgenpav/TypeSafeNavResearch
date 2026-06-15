@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">LegacyNav</string>
+    <string name="first_fragment_title">First Screen</string>
+    <string name="second_fragment_title">Second Screen</string>
+    <string name="subject_name_input">Enter the Subject name</string>
+    <string name="is_subject_checked">Is the subject checked?</string>
+    <string name="category_name_input">Enter the Category name</string>
+    <string name="navigate_button_text">Go to Second Screen</string>
+    <string name="go_back_button_text">Go back to First Screen</string>
+    <string name="subject_details">Subject Details:</string>
+    <string name="subject_id">ID:</string>
+    <string name="subject_name">Name:</string>
+    <string name="subject_checked">Checked:</string>
+    <string name="category_name">Category:</string>
+    <string name="subject_id_label">ID: %1$s</string>
+    <string name="subject_name_label">Name: %1$s</string>
+    <string name="subject_checked_label">Checked: %1$s</string>
+    <string name="category_name_label">Category: %1$s</string>
+</resources>

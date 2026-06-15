@@ -1,0 +1,80 @@
+package ua.edu.znu.tsnserialize.ui.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import ua.edu.znu.tsnserialize.data.Category
+import ua.edu.znu.tsnserialize.data.Subject
+
+
+/**
+ * The first screen of the app, allowing the user to input details for a Subject and navigate forward.
+ * The navigation callback accepts a Subject object, demonstrating type-safe data passing.
+ */
+@Composable
+fun FirstScreen(
+    /* Callback to navigate forward, accepting the user-type complex argument */
+    onNavigateForward: (Subject) -> Unit
+) {
+    val subjectName = rememberSaveable { mutableStateOf("") }
+    val isSubjectChecked = rememberSaveable { mutableStateOf(false) }
+    val categoryName = rememberSaveable { mutableStateOf("") }
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Text(text = "First Screen")
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            modifier = Modifier.testTag("subjectNameInput"),
+            value = subjectName.value,
+            onValueChange = { subjectName.value = it },
+            label = { Text("Enter the Subject name") }
+        )
+        Checkbox(
+            modifier = Modifier.testTag("subjectCheckedInput"),
+            checked = isSubjectChecked.value,
+            onCheckedChange = { isSubjectChecked.value = it }
+        )
+        OutlinedTextField(
+            modifier = Modifier.testTag("categoryNameInput"),
+            value = categoryName.value,
+            onValueChange = { categoryName.value = it },
+            label = { Text("Enter the Category name") }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                onNavigateForward(
+                    Subject(
+                        id = 1,
+                        name = subjectName.value,
+                        isChecked = isSubjectChecked.value,
+                        // Simulate some payload data to make serialization more realistic
+                        // Use the array filled with zeros for deterministic Subject instance
+                        // JSON representation size (JSON encoding uses Base64 encoding for byte arrays)
+                        data = ByteArray(100),
+                        category = Category(id = 1, name = categoryName.value)
+                    )
+                )
+            }) {
+            Text(text = "Go to Second Screen")
+        }
+    }
+}

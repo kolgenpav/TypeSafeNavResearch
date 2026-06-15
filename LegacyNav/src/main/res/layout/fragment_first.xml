@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".ui.FirstFragment">
+
+    <TextView
+        android:id="@+id/lblFirstScreenTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/first_fragment_title" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16.dp" />
+
+    <EditText
+        android:id="@+id/txtSubjectName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="@string/subject_name_input"
+        android:inputType="text"
+        android:minHeight="48dp" />
+
+    <CheckBox
+        android:id="@+id/isSubjectChecked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/is_subject_checked" />
+
+    <EditText
+        android:id="@+id/txtCategoryName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:ems="10"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:text="@string/category_name_input" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16.dp" />
+
+    <Button
+        android:id="@+id/btnNavigate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/navigate_button_text" />
+
+
+</LinearLayout>
