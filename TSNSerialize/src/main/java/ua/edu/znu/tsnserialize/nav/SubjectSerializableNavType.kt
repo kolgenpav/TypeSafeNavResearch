@@ -30,12 +30,16 @@ object SubjectSerializableNavType {
 
         override fun parseValue(value: String): Subject {
             // Route arg comes URI-encoded
+            // Only triggers when the app explicitly needs to turn a URL string back into your object
+            // (like opening a deep link or restoring your app after Android kills it in the background).
             val decoded = Uri.decode(value)
             return Json.decodeFromString(decoded)
         }
 
         override fun serializeAsValue(value: Subject): String {
             // Route args must be string-safe
+            // Only triggers when the app explicitly needs to turn a URL string back into your object
+            // (like opening a deep link or restoring your app after Android kills it in the background).
             val json = Json.encodeToString(value)
             return Uri.encode(json)
         }

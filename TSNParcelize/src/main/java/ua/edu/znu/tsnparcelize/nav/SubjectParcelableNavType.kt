@@ -49,6 +49,8 @@ object SubjectParcelableNavType {
         override fun parseValue(value: String): Subject {
             // This is still called for URI parsing, but for Parcelable strategy
             // the data flows through SavedState, not the route string
+            // Only triggers when the app explicitly needs to turn a URL string back into your object
+            // (like opening a deep link or restoring your app after Android kills it in the background).
             val decoded = Uri.decode(value)
             val bytes = Base64.decode(decoded, Base64.DEFAULT)
             val parcel = Parcel.obtain()
@@ -73,6 +75,8 @@ object SubjectParcelableNavType {
         override fun serializeAsValue(value: Subject): String {
             // For route serialization, we can still use JSON as fallback
             // but the Parcelable strategy primarily uses SavedState
+            // Only triggers when the app explicitly needs to turn a URL string back into your object
+            // (like opening a deep link or restoring your app after Android kills it in the background).
             val parcel = Parcel.obtain()
             return try {
                 parcel.writeParcelable(value, 0)

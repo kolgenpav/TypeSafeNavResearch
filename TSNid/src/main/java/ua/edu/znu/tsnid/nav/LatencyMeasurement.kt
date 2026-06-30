@@ -13,8 +13,8 @@ package ua.edu.znu.tsnid.nav
  * @param firstFrameNs    Navigation start → first Choreographer vsync (frame dispatch).
  */
 data class LatencyMeasurement(
-    val handoffSetupNs: Long,
-    val handoffNs: Long,
+    val handoffSetupNs: Long,   // T1
+    val handoffNs: Long,        // T2
     val compositionNs: Long,
-    val firstFrameNs: Long
+    val firstFrameNs: Long      // T3
 )

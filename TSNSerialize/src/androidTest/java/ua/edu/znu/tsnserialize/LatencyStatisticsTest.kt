@@ -22,7 +22,7 @@ import java.util.Collections
 import kotlin.time.Duration.Companion.nanoseconds
 
 private const val TAG = "LatencyStats"
-private const val ITERATIONS = 1
+private const val ITERATIONS = 100
 
 /**
  * Instrumented test that navigates from FirstScreen to SecondScreen [ITERATIONS] times,
@@ -36,7 +36,7 @@ class LatencyStatisticsTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun meanLatencies_over10NavigationCycles() {
+    fun meanLatencies_over100NavigationCycles() {
         val measurements: MutableList<LatencyMeasurement> =
             Collections.synchronizedList(mutableListOf())
 
