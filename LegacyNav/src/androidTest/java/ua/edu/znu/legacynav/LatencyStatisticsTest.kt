@@ -20,6 +20,7 @@ import ua.edu.znu.legacynav.benchmark.LatencyStatistics
 import ua.edu.znu.legacynav.benchmark.LatencyTracker
 import ua.edu.znu.legacynav.data.SubjectRepository
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.nanoseconds
 
 @RunWith(AndroidJUnit4::class)
 class LatencyStatisticsTest {
@@ -64,6 +65,21 @@ class LatencyStatisticsTest {
         assertEquals(runs, LatencyTracker.measurements.size)
 
         val stats = LatencyStatistics.from(LatencyTracker.measurements)
-        Log.d("LatencyStats", stats.toString())
+        Log.i("LatencyStats", "---- Latency Statistics ($runs iterations) ----")
+        Log.i("LatencyStats", "")
+        Log.i("LatencyStats", "Handoff Setup:")
+        Log.i("LatencyStats", "  Mean:          ${stats.meanHandoffSetupNs.nanoseconds}")
+        Log.i("LatencyStats", "  Std Dev:       ${stats.stdDevHandoffSetupNs.nanoseconds}")
+        Log.i("LatencyStats", "  95% CI:        ${stats.ci95LowerHandoffSetupNs.nanoseconds} - ${stats.ci95UpperHandoffSetupNs.nanoseconds}")
+        Log.i("LatencyStats", "")
+        Log.i("LatencyStats", "Handoff:")
+        Log.i("LatencyStats", "  Mean:          ${stats.meanHandoffNs.nanoseconds}")
+        Log.i("LatencyStats", "  Std Dev:       ${stats.stdDevHandoffNs.nanoseconds}")
+        Log.i("LatencyStats", "  95% CI:        ${stats.ci95LowerHandoffNs.nanoseconds} - ${stats.ci95UpperHandoffNs.nanoseconds}")
+        Log.i("LatencyStats", "")
+        Log.i("LatencyStats", "First Frame:")
+        Log.i("LatencyStats", "  Mean:          ${stats.meanFirstFrameNs.nanoseconds}")
+        Log.i("LatencyStats", "  Std Dev:       ${stats.stdDevFirstFrameNs.nanoseconds}")
+        Log.i("LatencyStats", "  95% CI:        ${stats.ci95LowerFirstFrameNs.nanoseconds} - ${stats.ci95UpperFirstFrameNs.nanoseconds}")
     }
 }

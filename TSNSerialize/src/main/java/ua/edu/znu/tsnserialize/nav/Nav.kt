@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import ua.edu.znu.tsnserialize.benchmark.LatencyMeasurement
 import ua.edu.znu.tsnserialize.data.Subject
 import ua.edu.znu.tsnserialize.ui.screens.FirstScreen
 import ua.edu.znu.tsnserialize.ui.screens.SecondScreen

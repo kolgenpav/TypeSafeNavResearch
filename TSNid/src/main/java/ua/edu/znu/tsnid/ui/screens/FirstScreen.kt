@@ -67,7 +67,7 @@ fun FirstScreen(
                         name = subjectName.value,
                         isChecked = isSubjectChecked.value,
                         // Should not affect the laten
-                        data = ByteArray(10000), // Simulate some payload data
+                        data = ByteArray(0), // Simulate some payload data
                         category = Category(id = 1, name = categoryName.value) // The same for id as above
                     )
                 )

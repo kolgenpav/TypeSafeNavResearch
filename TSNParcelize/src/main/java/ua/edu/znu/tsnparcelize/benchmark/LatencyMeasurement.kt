@@ -1,4 +1,4 @@
-package ua.edu.znu.tsnserialize.nav
+package ua.edu.znu.tsnparcelize.benchmark
 
 /**
  * Holds all four latency values (in nanoseconds) captured during a single
@@ -7,7 +7,7 @@ package ua.edu.znu.tsnserialize.nav
  * All values share 'navigationStartNs' as their zero point so they can be
  * compared arithmetically.
  *
- * @param handoffSetupNs  Duration of serialization + 'navigate' on the main thread (includes JSON serialization and route argument setup).
+ * @param handoffSetupNs  Duration of 'savedStateHandle.set' + 'navigate' on the main thread.
  * @param handoffNs       End-to-end handoff: navigation start → Subject in hand on SecondScreen.
  * @param compositionNs   Duration of SecondScreen's composable body execution.
  * @param firstFrameNs    Navigation start → first Choreographer vsync (frame dispatch).

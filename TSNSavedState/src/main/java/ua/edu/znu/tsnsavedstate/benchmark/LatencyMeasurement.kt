@@ -1,4 +1,4 @@
-package ua.edu.znu.tsnparcelize.nav
+package ua.edu.znu.tsnsavedstate.benchmark
 
 /**
  * Holds all four latency values (in nanoseconds) captured during a single

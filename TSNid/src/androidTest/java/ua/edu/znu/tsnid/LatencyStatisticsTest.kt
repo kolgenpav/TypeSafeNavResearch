@@ -16,8 +16,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import ua.edu.znu.tsnid.benchmark.LatencyMeasurement
+import ua.edu.znu.tsnid.benchmark.calculateStats
 import ua.edu.znu.tsnid.data.SubjectRepository
-import ua.edu.znu.tsnid.nav.LatencyMeasurement
 import ua.edu.znu.tsnid.nav.Nav
 import ua.edu.znu.tsnid.ui.theme.TSNIdTheme
 import java.util.Collections
@@ -44,7 +45,7 @@ class LatencyStatisticsTest {
     }
 
     @Test
-    fun meanLatencies_over10NavigationCycles() {
+    fun meanLatencies_over100NavigationCycles() {
         val measurements: MutableList<LatencyMeasurement> =
             Collections.synchronizedList(mutableListOf())
 
@@ -88,20 +89,41 @@ class LatencyStatisticsTest {
             measurements.size == ITERATIONS
         )
 
-        val meanHandoffSetup = measurements.map { it.handoffSetupNs }.average().toLong()
-        val meanHandoff = measurements.map { it.handoffNs }.average().toLong()
-        val meanComposition = measurements.map { it.compositionNs }.average().toLong()
-        val meanFirstFrame = measurements.map { it.firstFrameNs }.average().toLong()
+        val handoffSetupValues = measurements.map { it.handoffSetupNs }
+        val handoffValues = measurements.map { it.handoffNs }
+        val compositionValues = measurements.map { it.compositionNs }
+        val firstFrameValues = measurements.map { it.firstFrameNs }
+
+        val handoffSetupStats = calculateStats(handoffSetupValues)
+        val handoffStats = calculateStats(handoffValues)
+        val compositionStats = calculateStats(compositionValues)
+        val firstFrameStats = calculateStats(firstFrameValues)
 
         Log.i(TAG, "---- Latency Statistics ($ITERATIONS iterations) ----")
-        Log.i(TAG, "  Mean handoff setup:    ${meanHandoffSetup.nanoseconds}")
-        Log.i(TAG, "  Mean handoff:          ${meanHandoff.nanoseconds}")
-        Log.i(TAG, "  Mean composition:      ${meanComposition.nanoseconds}")
-        Log.i(TAG, "  Mean first frame:      ${meanFirstFrame.nanoseconds}")
+        Log.i(TAG, "")
+        Log.i(TAG, "Handoff Setup:")
+        Log.i(TAG, "  Mean:          ${handoffSetupStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${handoffSetupStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${handoffSetupStats.ci95Lower.nanoseconds} - ${handoffSetupStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "")
+        Log.i(TAG, "Handoff:")
+        Log.i(TAG, "  Mean:          ${handoffStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${handoffStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${handoffStats.ci95Lower.nanoseconds} - ${handoffStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "")
+        Log.i(TAG, "Composition:")
+        Log.i(TAG, "  Mean:          ${compositionStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${compositionStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${compositionStats.ci95Lower.nanoseconds} - ${compositionStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "")
+        Log.i(TAG, "First Frame:")
+        Log.i(TAG, "  Mean:          ${firstFrameStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${firstFrameStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${firstFrameStats.ci95Lower.nanoseconds} - ${firstFrameStats.ci95Upper.nanoseconds}")
 
         // Sanity assertions: all values must be positive and ordered correctly.
-        assertTrue("Handoff setup must be > 0", meanHandoffSetup > 0)
-        assertTrue("Handoff must be >= handoff setup", meanHandoff >= meanHandoffSetup)
-        assertTrue("First frame must be >= handoff", meanFirstFrame >= meanHandoff)
+        assertTrue("Handoff setup must be > 0", handoffSetupStats.mean > 0)
+        assertTrue("Handoff must be >= handoff setup", handoffStats.mean >= handoffSetupStats.mean)
+        assertTrue("First frame must be >= handoff", firstFrameStats.mean >= handoffStats.mean)
     }
 }
