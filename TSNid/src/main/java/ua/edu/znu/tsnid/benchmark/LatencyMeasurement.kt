@@ -1,4 +1,4 @@
-package ua.edu.znu.tsnid.nav
+package ua.edu.znu.tsnid.benchmark
 
 /**
  * Holds all four latency values (in nanoseconds) captured during a single
