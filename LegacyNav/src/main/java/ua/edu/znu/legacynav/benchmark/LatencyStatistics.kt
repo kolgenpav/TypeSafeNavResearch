@@ -49,11 +49,17 @@ data class LatencyStatistics(
         
         private fun computeStats(values: List<Long>): StatsResult {
             val mean = values.average().toLong()
-            val variance = values.map { (it - mean) * (it - mean) }.average()
+            val n = values.size
+            
+            // Sample variance: Σ(x - mean)² / (n - 1)
+            val variance = if (n > 1) {
+                values.map { (it - mean) * (it - mean) }.sum() / (n - 1).toDouble()
+            } else {
+                0.0
+            }
             val stdDev = sqrt(variance).toLong()
             
             // 95% CI using t-distribution approximation (t ≈ 1.984 for n=100)
-            val n = values.size
             val marginOfError = (1.984 * stdDev / sqrt(n.toDouble())).toLong()
             
             return StatsResult(
