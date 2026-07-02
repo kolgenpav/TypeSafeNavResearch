@@ -34,32 +34,50 @@ class LatencyStatisticsTest {
         LatencyTracker.measurements.clear()
     }
 
+    private fun performNavigationCycle(index: Int, label: String, shouldMeasure: Boolean = false) {
+        onView(withId(R.id.txtSubjectName))
+            .perform(replaceText("$label $index"), closeSoftKeyboard())
+        if(index % 2 == 0) {
+            onView(withId(R.id.isSubjectChecked)).perform(click())
+        }
+        onView(withId(R.id.txtCategoryName))
+            .perform(replaceText("$label $index"), closeSoftKeyboard())
+        onView(withId(R.id.btnNavigate)).perform(click())
+
+        if (shouldMeasure) {
+            assertTrue(
+                "Choreographer frame not received within timeout on run $index",
+                LatencyTracker.frameLatch.await(2, TimeUnit.SECONDS)
+            )
+        } else {
+            assertTrue(
+                "Choreographer frame not received within timeout on warmup run $index",
+                LatencyTracker.frameLatch.await(2, TimeUnit.SECONDS)
+            )
+        }
+
+        onView(withId(R.id.subjectId)).check(matches(isDisplayed()))
+        onView(withId(R.id.btnBack)).perform(click())
+    }
+
     @Test
     fun meanLatencies_over10Runs() {
         val runs = 100
+        val warmupRuns = 10
+
+        // JVM warm-up iterations (without measuring)
+        repeat(warmupRuns) { i ->
+            LatencyTracker.frameLatch = java.util.concurrent.CountDownLatch(1)
+            performNavigationCycle(i, "Warmup")
+        }
+
+        // Clear measurements after warm-up
+        LatencyTracker.measurements.clear()
 
         repeat(runs) { i ->
             // Arm the latch before navigation so the Choreographer callback can signal it.
             LatencyTracker.frameLatch = java.util.concurrent.CountDownLatch(1)
-
-            onView(withId(R.id.txtSubjectName))
-                .perform(replaceText("Subject $i"), closeSoftKeyboard())
-            if(i % 2 == 0) {
-                onView(withId(R.id.isSubjectChecked)).perform(click()) // toggle the checkbox to add some variability
-            }
-            onView(withId(R.id.txtCategoryName))
-                .perform(replaceText("Category $i"), closeSoftKeyboard())
-            onView(withId(R.id.btnNavigate)).perform(click())
-
-            // Wait for the Choreographer frame callback to fire (max 2 s).
-            assertTrue(
-                "Choreographer frame not received within timeout on run $i",
-                LatencyTracker.frameLatch.await(2, TimeUnit.SECONDS)
-            )
-
-            // Verify SecondFragment is visible, then go back.
-            onView(withId(R.id.subjectId)).check(matches(isDisplayed()))
-            onView(withId(R.id.btnBack)).perform(click())
+            performNavigationCycle(i, "Subject", shouldMeasure = true)
         }
 
         assertEquals(runs, LatencyTracker.measurements.size)

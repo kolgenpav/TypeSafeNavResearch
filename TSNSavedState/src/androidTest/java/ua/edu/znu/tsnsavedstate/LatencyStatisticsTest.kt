@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 
 private const val TAG = "LatencyStats"
 private const val ITERATIONS = 100
+private const val WARMUP_ITERATIONS = 10
 
 /**
  * Instrumented test that navigates from FirstScreen to SecondScreen [ITERATIONS] times,
@@ -35,6 +36,32 @@ class LatencyStatisticsTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private fun performNavigationCycle(index: Int, label: String, measurements: List<LatencyMeasurement>? = null) {
+        composeTestRule.onNodeWithTag("subjectNameInput").performTextClearance()
+        composeTestRule.onNodeWithTag("subjectNameInput").performClick()
+            .performTextInput("$label $index")
+        if (index % 2 == 0) {
+            composeTestRule.onNodeWithTag("subjectCheckedInput")
+                .performClick()
+        }
+        composeTestRule.onNodeWithTag("categoryNameInput").performTextClearance()
+        composeTestRule.onNodeWithTag("categoryNameInput").performClick()
+            .performTextInput("$label $index")
+        composeTestRule.onNodeWithText("Go to Second Screen").performClick()
+        
+        // Wait for measurement if measurements list provided, otherwise just wait for idle
+        if (measurements != null) {
+            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                measurements.size > index
+            }
+        } else {
+            composeTestRule.waitForIdle()
+        }
+        
+        composeTestRule.onNodeWithText("Go back to First Screen").performClick()
+        composeTestRule.waitForIdle()
+    }
 
     @Test
     fun meanLatencies_over100NavigationCycles() {
@@ -54,25 +81,16 @@ class LatencyStatisticsTest {
             }
         }
 
+        // JVM warm-up iterations (without measuring)
+        repeat(WARMUP_ITERATIONS) { index ->
+            performNavigationCycle(index, "Warmup")
+        }
+
+        // Clear any measurements from warm-up (though callback not attached, but be safe)
+        measurements.clear()
+
         repeat(ITERATIONS) { index ->
-            composeTestRule.onNodeWithTag("subjectNameInput").performTextClearance() // reset input fields
-            composeTestRule.onNodeWithTag("subjectNameInput").performClick()
-                .performTextInput("Subject $index")
-            if (index % 2 == 0) {
-                composeTestRule.onNodeWithTag("subjectCheckedInput")
-                    .performClick() // toggle the checkbox to add some variability
-            }
-            composeTestRule.onNodeWithTag("categoryNameInput").performTextClearance()
-            composeTestRule.onNodeWithTag("categoryNameInput").performClick()
-                .performTextInput("Category $index")
-            composeTestRule.onNodeWithText("Go to Second Screen").performClick()
-            // Wait until the current cycle's measurement has been reported
-            // (withFrameNanos fires after the frame is dispatched).
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
-                measurements.size > index
-            }
-            composeTestRule.onNodeWithText("Go back to First Screen").performClick()
-            composeTestRule.waitForIdle()
+            performNavigationCycle(index, "Subject", measurements)
         }
 
         assertTrue("Expected $ITERATIONS measurements, got ${measurements.size}",
