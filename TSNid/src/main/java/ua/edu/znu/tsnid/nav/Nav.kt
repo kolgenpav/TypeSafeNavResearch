@@ -16,7 +16,6 @@ import ua.edu.znu.tsnid.data.SubjectRepository
 import ua.edu.znu.tsnid.ui.screens.FirstScreen
 import ua.edu.znu.tsnid.ui.screens.SecondScreen
 import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.measureTime
 
 private const val TAG = "Nav"
 
@@ -52,16 +51,16 @@ fun Nav(
                     // Capture start BEFORE any strategy work so the handler's own overhead
                     // (data save to SavedState + navigate()) is cleanly isolated from the
                     // test-framework dispatch cost that precedes it on the main thread.
-                    navigationStartNs[0] = System.nanoTime()
-                    val handoffSetupLatency = measureTime {
-                        // Strategy A: Retrieval strategy (data saved to a repository, ID passed via route arguments)
-                        val saved = SubjectRepository.add(subject)
-                        // the route arg size is 4 bytes and does not require serialization,
-                        // so this strategy's setup latency is minimal and stable across Subject sizes.
-                        navController.navigate(Routes.SecondScreenA(saved.id))
-                    }
-                    handoffSetupNs[0] = handoffSetupLatency.inWholeNanoseconds
-                    Log.d(TAG, "Subject handoff setup took $handoffSetupLatency")
+                    val t0 = System.nanoTime()
+                    navigationStartNs[0] = t0
+                    // Strategy A: Retrieval strategy (data saved to a repository, ID passed via route arguments)
+                    val saved = SubjectRepository.add(subject)
+                    // the route arg size is 4 bytes and does not require serialization,
+                    // so this strategy's setup latency is minimal and stable across Subject sizes.
+                    navController.navigate(Routes.SecondScreenA(saved.id))
+                    val t1 = System.nanoTime()
+                    handoffSetupNs[0] = t1 - t0
+                    Log.d(TAG, "Subject handoff setup took ${(t1 - t0).nanoseconds}")
                 })
         }
 

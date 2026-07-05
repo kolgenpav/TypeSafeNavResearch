@@ -34,14 +34,14 @@ class LatencyStatisticsTest {
         LatencyTracker.measurements.clear()
     }
 
-    private fun performNavigationCycle(index: Int, label: String, shouldMeasure: Boolean = false) {
+    private fun performNavigationCycle(index: Int, subjectLabel: String, categoryLabel: String, shouldMeasure: Boolean = false) {
         onView(withId(R.id.txtSubjectName))
-            .perform(replaceText("$label $index"), closeSoftKeyboard())
+            .perform(replaceText("$subjectLabel $index"), closeSoftKeyboard())
         if(index % 2 == 0) {
             onView(withId(R.id.isSubjectChecked)).perform(click())
         }
         onView(withId(R.id.txtCategoryName))
-            .perform(replaceText("$label $index"), closeSoftKeyboard())
+            .perform(replaceText("$categoryLabel $index"), closeSoftKeyboard())
         onView(withId(R.id.btnNavigate)).perform(click())
 
         if (shouldMeasure) {
@@ -68,7 +68,7 @@ class LatencyStatisticsTest {
         // JVM warm-up iterations (without measuring)
         repeat(warmupRuns) { i ->
             LatencyTracker.frameLatch = java.util.concurrent.CountDownLatch(1)
-            performNavigationCycle(i, "Warmup")
+            performNavigationCycle(i, "Warmup", "Warmup")
         }
 
         // Clear measurements after warm-up
@@ -77,7 +77,7 @@ class LatencyStatisticsTest {
         repeat(runs) { i ->
             // Arm the latch before navigation so the Choreographer callback can signal it.
             LatencyTracker.frameLatch = java.util.concurrent.CountDownLatch(1)
-            performNavigationCycle(i, "Subject", shouldMeasure = true)
+            performNavigationCycle(i, "Subject", "Category", shouldMeasure = true)
         }
 
         assertEquals(runs, LatencyTracker.measurements.size)

@@ -37,17 +37,17 @@ class LatencyStatisticsTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun performNavigationCycle(index: Int, label: String, measurements: List<LatencyMeasurement>? = null) {
+    private fun performNavigationCycle(index: Int, subjectLabel: String, categoryLabel: String, measurements: List<LatencyMeasurement>? = null) {
         composeTestRule.onNodeWithTag("subjectNameInput").performTextClearance()
         composeTestRule.onNodeWithTag("subjectNameInput").performClick()
-            .performTextInput("$label $index")
+            .performTextInput("$subjectLabel $index")
         if (index % 2 == 0) {
             composeTestRule.onNodeWithTag("subjectCheckedInput")
                 .performClick()
         }
         composeTestRule.onNodeWithTag("categoryNameInput").performTextClearance()
         composeTestRule.onNodeWithTag("categoryNameInput").performClick()
-            .performTextInput("$label $index")
+            .performTextInput("$categoryLabel $index")
         composeTestRule.onNodeWithText("Go to Second Screen").performClick()
 
         if (measurements != null) {
@@ -82,14 +82,14 @@ class LatencyStatisticsTest {
 
         // JVM warm-up iterations (without measuring)
         repeat(WARMUP_ITERATIONS) { index ->
-            performNavigationCycle(index, "Warmup")
+            performNavigationCycle(index, "Warmup", "Warmup")
         }
 
         // Clear any measurements from warm-up (though callback not attached, but be safe)
         measurements.clear()
 
         repeat(ITERATIONS) { index ->
-            performNavigationCycle(index, "Subject", measurements)
+            performNavigationCycle(index, "Subject", "Category", measurements)
         }
 
         assertTrue("Expected $ITERATIONS measurements, got ${measurements.size}",

@@ -16,7 +16,6 @@ import ua.edu.znu.tsnsavedstate.data.Subject
 import ua.edu.znu.tsnsavedstate.ui.screens.FirstScreen
 import ua.edu.znu.tsnsavedstate.ui.screens.SecondScreen
 import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.measureTime
 
 private const val TAG = "Nav"
 private const val SUBJECT_ARG_KEY = "subject_arg"
@@ -53,17 +52,17 @@ fun Nav(
                     // Capture start BEFORE any strategy work so the handler's own overhead
                     // (data save to SavedState + navigate()) is cleanly isolated from the
                     // test-framework dispatch cost that precedes it on the main thread.
-                    navigationStartNs[0] = System.nanoTime()
-                    val handoffSetupLatency = measureTime {
-                        // Strategy D: SavedStateHandle (data passed via SavedStateHandle, no args in route)
-                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                            SUBJECT_ARG_KEY,
-                            subject
-                        )
-                        navController.navigate(Routes.SecondScreenD)
-                    }
-                    handoffSetupNs[0] = handoffSetupLatency.inWholeNanoseconds
-                    Log.d(TAG, "Subject handoff setup took $handoffSetupLatency")
+                    val t0 = System.nanoTime()
+                    navigationStartNs[0] = t0
+                    // Strategy D: SavedStateHandle (data passed via SavedStateHandle, no args in route)
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        SUBJECT_ARG_KEY,
+                        subject
+                    )
+                    navController.navigate(Routes.SecondScreenD)
+                    val t1 = System.nanoTime()
+                    handoffSetupNs[0] = t1 - t0
+                    Log.d(TAG, "Subject handoff setup took ${(t1 - t0).nanoseconds}")
                 })
         }
 

@@ -18,7 +18,6 @@ import ua.edu.znu.tsnserialize.ui.screens.FirstScreen
 import ua.edu.znu.tsnserialize.ui.screens.SecondScreen
 import kotlin.reflect.typeOf
 import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.measureTime
 
 private const val TAG = "Nav"
 
@@ -54,13 +53,13 @@ fun Nav(
                     // Capture start BEFORE any strategy work so the handler's own overhead
                     // (navigate with data pass serialization) is cleanly isolated from the
                     // test-framework dispatch cost that precedes it on the main thread.
-                    navigationStartNs[0] = System.nanoTime()
-                    val handoffSetupLatency = measureTime {
-                        // Strategy B: Serialization strategy (data passed via route arguments, serialized to JSON)
-                        navController.navigate(Routes.SecondScreenB(subject))
-                    }
-                    handoffSetupNs[0] = handoffSetupLatency.inWholeNanoseconds
-                    Log.d(TAG, "Subject handoff setup took $handoffSetupLatency")
+                    val t0 = System.nanoTime()
+                    navigationStartNs[0] = t0
+                    // Strategy B: Serialization strategy (data passed via route arguments, serialized to JSON)
+                    navController.navigate(Routes.SecondScreenB(subject))
+                    val t1 = System.nanoTime()
+                    handoffSetupNs[0] = t1 - t0
+                    Log.d(TAG, "Subject handoff setup took ${(t1 - t0).nanoseconds}")
                 })
         }
 
