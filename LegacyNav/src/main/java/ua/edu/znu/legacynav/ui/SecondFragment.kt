@@ -32,9 +32,16 @@ class SecondFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // T2: Capture when SecondFragment view creation starts
+        val t2 = System.nanoTime()
+        LatencyTracker.destinationScreenEntered = t2
+
         val args = SecondFragmentArgs.fromBundle(requireArguments())
         val subject = SubjectRepository.getById(args.subjectId)
-        val handoffEndNs = System.nanoTime() // subject now "in hand" on SecondScreen
+        
+        // T3: Capture after subject is retrieved
+        val t3 = System.nanoTime()
+        LatencyTracker.objectRetrieved = t3
 
         view.findViewById<TextView>(R.id.subjectId).text =
             getString(R.string.subject_id_label, (subject?.id ?: args.subjectId).toString())
@@ -46,10 +53,14 @@ class SecondFragment : Fragment() {
             getString(R.string.category_name_label, subject?.category?.name ?: "")
 
         Choreographer.getInstance().postFrameCallback {
+            // T4: Capture when first frame is dispatched
+            val t4 = System.nanoTime()
             val measurement = LatencyMeasurement(
-                handoffSetupNs = LatencyTracker.handoffSetupEndNs - LatencyTracker.navigationStartNs,
-                handoffNs = handoffEndNs - LatencyTracker.navigationStartNs,
-                firstFrameNs = System.nanoTime() - LatencyTracker.navigationStartNs
+                navigationInitiated = LatencyTracker.navigationInitiated,
+                setupCompleted = LatencyTracker.setupCompleted,
+                destinationScreenEntered = LatencyTracker.destinationScreenEntered,
+                objectRetrieved = LatencyTracker.objectRetrieved,
+                firstFrameDispatched = t4
             )
             Log.d("LatencyMeasurement", measurement.toString())
             LatencyTracker.measurements.add(measurement)

@@ -6,44 +6,54 @@ import kotlin.math.sqrt
  * Statistics (mean, std dev, 95% CI) computed over a collection of [LatencyMeasurement] runs.
  */
 data class LatencyStatistics(
-    val meanHandoffSetupNs: Long,
-    val meanHandoffNs: Long,
-    val meanFirstFrameNs: Long,
-    val stdDevHandoffSetupNs: Long,
-    val stdDevHandoffNs: Long,
-    val stdDevFirstFrameNs: Long,
-    val ci95LowerHandoffSetupNs: Long,
-    val ci95UpperHandoffSetupNs: Long,
-    val ci95LowerHandoffNs: Long,
-    val ci95UpperHandoffNs: Long,
-    val ci95LowerFirstFrameNs: Long,
-    val ci95UpperFirstFrameNs: Long
+    val meanSetupLatency: Long,
+    val meanFrameworkRoutingLatency: Long,
+    val meanObjectRetrievalLatency: Long,
+    val meanScreenRenderLatency: Long,
+    val stdDevSetupLatency: Long,
+    val stdDevFrameworkRoutingLatency: Long,
+    val stdDevObjectRetrievalLatency: Long,
+    val stdDevScreenRenderLatency: Long,
+    val ci95LowerSetupLatency: Long,
+    val ci95UpperSetupLatency: Long,
+    val ci95LowerFrameworkRoutingLatency: Long,
+    val ci95UpperFrameworkRoutingLatency: Long,
+    val ci95LowerObjectRetrievalLatency: Long,
+    val ci95UpperObjectRetrievalLatency: Long,
+    val ci95LowerScreenRenderLatency: Long,
+    val ci95UpperScreenRenderLatency: Long
 ) {
     companion object {
         fun from(measurements: List<LatencyMeasurement>): LatencyStatistics {
             require(measurements.isNotEmpty()) { "Cannot compute statistics from an empty list" }
             
-            val handoffSetupValues = measurements.map { it.handoffSetupNs }
-            val handoffValues = measurements.map { it.handoffNs }
-            val firstFrameValues = measurements.map { it.firstFrameNs }
+            val setupLatencyValues = measurements.map { it.setupLatency }
+            val frameworkRoutingLatencyValues = measurements.map { it.frameworkRoutingLatency }
+            val objectRetrievalLatencyValues = measurements.map { it.objectRetrievalLatency }
+            val screenRenderLatencyValues = measurements.map { it.screenRenderLatency }
             
-            val handoffSetupStats = computeStats(handoffSetupValues)
-            val handoffStats = computeStats(handoffValues)
-            val firstFrameStats = computeStats(firstFrameValues)
+            val setupLatencyStats = computeStats(setupLatencyValues)
+            val frameworkRoutingLatencyStats = computeStats(frameworkRoutingLatencyValues)
+            val objectRetrievalLatencyStats = computeStats(objectRetrievalLatencyValues)
+            val screenRenderLatencyStats = computeStats(screenRenderLatencyValues)
             
             return LatencyStatistics(
-                meanHandoffSetupNs = handoffSetupStats.mean,
-                meanHandoffNs = handoffStats.mean,
-                meanFirstFrameNs = firstFrameStats.mean,
-                stdDevHandoffSetupNs = handoffSetupStats.stdDev,
-                stdDevHandoffNs = handoffStats.stdDev,
-                stdDevFirstFrameNs = firstFrameStats.stdDev,
-                ci95LowerHandoffSetupNs = handoffSetupStats.ci95Lower,
-                ci95UpperHandoffSetupNs = handoffSetupStats.ci95Upper,
-                ci95LowerHandoffNs = handoffStats.ci95Lower,
-                ci95UpperHandoffNs = handoffStats.ci95Upper,
-                ci95LowerFirstFrameNs = firstFrameStats.ci95Lower,
-                ci95UpperFirstFrameNs = firstFrameStats.ci95Upper
+                meanSetupLatency = setupLatencyStats.mean,
+                meanFrameworkRoutingLatency = frameworkRoutingLatencyStats.mean,
+                meanObjectRetrievalLatency = objectRetrievalLatencyStats.mean,
+                meanScreenRenderLatency = screenRenderLatencyStats.mean,
+                stdDevSetupLatency = setupLatencyStats.stdDev,
+                stdDevFrameworkRoutingLatency = frameworkRoutingLatencyStats.stdDev,
+                stdDevObjectRetrievalLatency = objectRetrievalLatencyStats.stdDev,
+                stdDevScreenRenderLatency = screenRenderLatencyStats.stdDev,
+                ci95LowerSetupLatency = setupLatencyStats.ci95Lower,
+                ci95UpperSetupLatency = setupLatencyStats.ci95Upper,
+                ci95LowerFrameworkRoutingLatency = frameworkRoutingLatencyStats.ci95Lower,
+                ci95UpperFrameworkRoutingLatency = frameworkRoutingLatencyStats.ci95Upper,
+                ci95LowerObjectRetrievalLatency = objectRetrievalLatencyStats.ci95Lower,
+                ci95UpperObjectRetrievalLatency = objectRetrievalLatencyStats.ci95Upper,
+                ci95LowerScreenRenderLatency = screenRenderLatencyStats.ci95Lower,
+                ci95UpperScreenRenderLatency = screenRenderLatencyStats.ci95Upper
             )
         }
         

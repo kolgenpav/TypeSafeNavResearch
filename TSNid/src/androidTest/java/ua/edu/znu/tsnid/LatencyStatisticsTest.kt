@@ -105,41 +105,42 @@ class LatencyStatisticsTest {
             measurements.size == ITERATIONS
         )
 
-        val handoffSetupValues = measurements.map { it.handoffSetupNs }
-        val handoffValues = measurements.map { it.handoffNs }
-        val compositionValues = measurements.map { it.compositionNs }
-        val firstFrameValues = measurements.map { it.firstFrameNs }
+        val setupLatencyValues = measurements.map { it.setupLatency }
+        val frameworkRoutingLatencyValues = measurements.map { it.frameworkRoutingLatency }
+        val objectRetrievalLatencyValues = measurements.map { it.objectRetrievalLatency }
+        val screenRenderLatencyValues = measurements.map { it.screenRenderLatency }
 
-        val handoffSetupStats = calculateStats(handoffSetupValues)
-        val handoffStats = calculateStats(handoffValues)
-        val compositionStats = calculateStats(compositionValues)
-        val firstFrameStats = calculateStats(firstFrameValues)
+        val setupLatencyStats = calculateStats(setupLatencyValues)
+        val frameworkRoutingLatencyStats = calculateStats(frameworkRoutingLatencyValues)
+        val objectRetrievalLatencyStats = calculateStats(objectRetrievalLatencyValues)
+        val screenRenderLatencyStats = calculateStats(screenRenderLatencyValues)
 
         Log.i(TAG, "---- Latency Statistics ($ITERATIONS iterations) ----")
         Log.i(TAG, "")
-        Log.i(TAG, "Handoff Setup:")
-        Log.i(TAG, "  Mean:          ${handoffSetupStats.mean.nanoseconds}")
-        Log.i(TAG, "  Std Dev:       ${handoffSetupStats.stdDev.nanoseconds}")
-        Log.i(TAG, "  95% CI:        ${handoffSetupStats.ci95Lower.nanoseconds} - ${handoffSetupStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "Setup (FirstScreen):")
+        Log.i(TAG, "  Mean:          ${setupLatencyStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${setupLatencyStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${setupLatencyStats.ci95Lower.nanoseconds} - ${setupLatencyStats.ci95Upper.nanoseconds}")
         Log.i(TAG, "")
-        Log.i(TAG, "Handoff:")
-        Log.i(TAG, "  Mean:          ${handoffStats.mean.nanoseconds}")
-        Log.i(TAG, "  Std Dev:       ${handoffStats.stdDev.nanoseconds}")
-        Log.i(TAG, "  95% CI:        ${handoffStats.ci95Lower.nanoseconds} - ${handoffStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "Framework Routing:")
+        Log.i(TAG, "  Mean:          ${frameworkRoutingLatencyStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${frameworkRoutingLatencyStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${frameworkRoutingLatencyStats.ci95Lower.nanoseconds} - ${frameworkRoutingLatencyStats.ci95Upper.nanoseconds}")
         Log.i(TAG, "")
-        Log.i(TAG, "Composition:")
-        Log.i(TAG, "  Mean:          ${compositionStats.mean.nanoseconds}")
-        Log.i(TAG, "  Std Dev:       ${compositionStats.stdDev.nanoseconds}")
-        Log.i(TAG, "  95% CI:        ${compositionStats.ci95Lower.nanoseconds} - ${compositionStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "Object Retrieval:")
+        Log.i(TAG, "  Mean:          ${objectRetrievalLatencyStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${objectRetrievalLatencyStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${objectRetrievalLatencyStats.ci95Lower.nanoseconds} - ${objectRetrievalLatencyStats.ci95Upper.nanoseconds}")
         Log.i(TAG, "")
-        Log.i(TAG, "First Frame:")
-        Log.i(TAG, "  Mean:          ${firstFrameStats.mean.nanoseconds}")
-        Log.i(TAG, "  Std Dev:       ${firstFrameStats.stdDev.nanoseconds}")
-        Log.i(TAG, "  95% CI:        ${firstFrameStats.ci95Lower.nanoseconds} - ${firstFrameStats.ci95Upper.nanoseconds}")
+        Log.i(TAG, "Screen Render:")
+        Log.i(TAG, "  Mean:          ${screenRenderLatencyStats.mean.nanoseconds}")
+        Log.i(TAG, "  Std Dev:       ${screenRenderLatencyStats.stdDev.nanoseconds}")
+        Log.i(TAG, "  95% CI:        ${screenRenderLatencyStats.ci95Lower.nanoseconds} - ${screenRenderLatencyStats.ci95Upper.nanoseconds}")
 
         // Sanity assertions: all values must be positive and ordered correctly.
-        assertTrue("Handoff setup must be > 0", handoffSetupStats.mean > 0)
-        assertTrue("Handoff must be >= handoff setup", handoffStats.mean >= handoffSetupStats.mean)
-        assertTrue("First frame must be >= handoff", firstFrameStats.mean >= handoffStats.mean)
+        assertTrue("Setup must be > 0", setupLatencyStats.mean > 0)
+        assertTrue("Routing must be > 0", frameworkRoutingLatencyStats.mean > 0)
+        assertTrue("Object retrieval must be >= 0", objectRetrievalLatencyStats.mean >= 0)
+        assertTrue("Screen render must be > 0", screenRenderLatencyStats.mean > 0)
     }
 }

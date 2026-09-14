@@ -45,11 +45,15 @@ class FirstFragment : Fragment() {
                 isChecked = isSubjectChecked.isChecked,
                 category = category
             )
-            LatencyTracker.navigationStartNs = System.nanoTime()
+            // T0: Capture start before setup work
+            val t0 = System.nanoTime()
+            LatencyTracker.navigationInitiated = t0
             val saved = SubjectRepository.add(subject)
             val action = FirstFragmentDirections.actionFirstToSecond(saved.id)
             findNavController().navigate(action)
-            LatencyTracker.handoffSetupEndNs = System.nanoTime()
+            // T1: Capture after navigate() completes
+            val t1 = System.nanoTime()
+            LatencyTracker.setupCompleted = t1
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿package ua.edu.znu.tsnparcelize.nav
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -17,19 +17,16 @@ import ua.edu.znu.tsnparcelize.data.Subject
 import ua.edu.znu.tsnparcelize.ui.screens.FirstScreen
 import ua.edu.znu.tsnparcelize.ui.screens.SecondScreen
 import kotlin.reflect.typeOf
-import kotlin.time.Duration.Companion.nanoseconds
-
-private const val TAG = "Nav"
 
 /**
  * Main navigation graph composable.
  *
- * Measures four latency values per forward-navigation cycle and optionally
+ * Measures five timing points per forward-navigation cycle and optionally
  * reports them via [onLatencyMeasured] for testing and statistical analysis.
  *
  * @param innerPadding    Padding values provided by the Scaffold.
  * @param onLatencyMeasured Optional callback invoked once per cycle, inside the first
- *                          Choreographer frame of SecondScreen, with all four measurements.
+ *                          Choreographer frame of SecondScreen, with all five timing points.
  */
 @Composable
 fun Nav(
@@ -37,10 +34,9 @@ fun Nav(
     onLatencyMeasured: ((LatencyMeasurement) -> Unit)? = null,
 ) {
     val navController = rememberNavController()
-    // Shared monotonic timestamps (ns). LongArray(1) avoids recomposition
-    // side-effects that mutableStateOf would cause on write.
-    val navigationStartNs = remember { LongArray(1) }
-    val handoffSetupNs = remember { LongArray(1) }
+    // Shared timestamps that persist across scope boundaries (FirstScreen → SecondScreen).
+    val navigationInitiated = remember { mutableStateOf(0L) }  // T0: Navigation initiated
+    val setupCompleted = remember { mutableStateOf(0L) }       // T1: Setup complete
 
     NavHost(
         navController = navController,
@@ -50,16 +46,14 @@ fun Nav(
         composable<Routes.FirstScreen> {
             FirstScreen(
                 onNavigateForward = { subject ->
-                    // Capture start BEFORE any strategy work so the handler's own overhead
-                    // (data save to SavedState + navigate()) is cleanly isolated from the
-                    // test-framework dispatch cost that precedes it on the main thread.
+                    // T0: Capture start before setup work
                     val t0 = System.nanoTime()
-                    navigationStartNs[0] = t0
+                    navigationInitiated.value = t0
                     // C: Parcelable strategy (data passed via route args and Parcelize to SavedState)
                     navController.navigate(Routes.SecondScreenC(subject))
+                    // T1: Capture after navigate() call completes
                     val t1 = System.nanoTime()
-                    handoffSetupNs[0] = t1 - t0
-                    Log.d(TAG, "Subject handoff setup took ${(t1 - t0).nanoseconds}")
+                    setupCompleted.value = t1
                 })
         }
 
@@ -67,35 +61,28 @@ fun Nav(
         composable<Routes.SecondScreenC>(
             typeMap = mapOf(typeOf<Subject>() to SubjectParcelableNavType.subjectType)
         ) { backStackEntry ->
+            // T2: Capture when SecondScreen composable starts
+            val t2 = System.nanoTime()
             val route = backStackEntry.toRoute<Routes.SecondScreenC>()
-            // Capture elapsed time after the Subject is retrieved: this is the true
-            // end-to-end handoff latency - from navigation start to Subject in hand.
-            val handoffLatencyNs = remember { System.nanoTime() - navigationStartNs[0] }
-            // Capture composition start just before SecondScreen() runs.
-            val compositionStartNs = remember { System.nanoTime() }
+            // T3: Capture after data is retrieved
+            val t3 = System.nanoTime()
+            
             SecondScreen(
                 subject = route.subject,
                 onNavigateBack = { navController.popBackStack() }
             )
-            // Captured right after SecondScreen() completes its composition pass.
-            val compositionLatencyNs = remember { System.nanoTime() - compositionStartNs }
-            // LaunchedEffect(Unit) runs exactly once after the first composition -
-            // the correct place for side effects such as logging and reporting.
+            // LaunchedEffect(Unit) runs exactly once after the first composition
             LaunchedEffect(Unit) {
-                Log.d(TAG, "Subject handoff latency took ${handoffLatencyNs.nanoseconds}")
-                Log.d(TAG, "SecondScreen composition took ${compositionLatencyNs.nanoseconds}")
                 withFrameNanos {
-                    val renderingLatencyNs = System.nanoTime() - navigationStartNs[0]
-                    Log.d(
-                        TAG,
-                        "SecondScreen first frame dispatch took ${renderingLatencyNs.nanoseconds}"
-                    )
+                    // T4: Capture when first frame is dispatched
+                    val t4 = System.nanoTime()
                     onLatencyMeasured?.invoke(
                         LatencyMeasurement(
-                            handoffSetupNs = handoffSetupNs[0],
-                            handoffNs = handoffLatencyNs,
-                            compositionNs = compositionLatencyNs,
-                            firstFrameNs = renderingLatencyNs
+                            navigationInitiated = navigationInitiated.value,
+                            setupCompleted = setupCompleted.value,
+                            destinationScreenEntered = t2,
+                            objectRetrieved = t3,
+                            firstFrameDispatched = t4
                         )
                     )
                 }
