@@ -51,10 +51,12 @@ class LatencyStatisticsTest {
         composeTestRule.onNodeWithText("Go to Second Screen").performClick()
 
         if (measurements != null) {
+            //waits for the measurement to be recorded
             composeTestRule.waitUntil(timeoutMillis = 5_000) {
                 measurements.size > index
             }
         } else {
+            //waits for the UI to settle
             composeTestRule.waitForIdle()
         }
 
