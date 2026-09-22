@@ -25,8 +25,8 @@ import java.util.Collections
 import kotlin.time.Duration.Companion.nanoseconds
 
 private const val TAG = "LatencyStats"
-private const val ITERATIONS = 100
-private const val WARMUP_ITERATIONS = 10
+private const val ITERATIONS = 1
+private const val WARMUP_ITERATIONS = 0
 
 /**
  * Instrumented test that navigates from FirstScreen to SecondScreen [ITERATIONS] times,

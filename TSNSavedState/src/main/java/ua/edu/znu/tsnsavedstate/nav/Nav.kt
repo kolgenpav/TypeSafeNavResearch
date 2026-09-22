@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -35,8 +35,8 @@ fun Nav(
 ) {
     val navController = rememberNavController()
     // Shared timestamps that persist across scope boundaries (FirstScreen → SecondScreen).
-    val navigationInitiated = remember { mutableStateOf(0L) }  // T0: Navigation initiated
-    val setupCompleted = remember { mutableStateOf(0L) }       // T1: Setup complete
+    val navigationInitiated = remember { mutableLongStateOf(0L) }  // T0: Navigation initiated
+    val setupCompleted = remember { mutableLongStateOf(0L) }       // T1: Setup complete
 
     NavHost(
         navController = navController,
@@ -46,18 +46,19 @@ fun Nav(
         composable<Routes.FirstScreen> {
             FirstScreen(
                 onNavigateForward = { subject ->
-                    // T0: Capture start before setup work
-                    val t0 = System.nanoTime()
-                    navigationInitiated.value = t0
-                    // Strategy D: SavedStateHandle (data passed via SavedStateHandle, no args in route)
+                    // Store the Subject in the SavedStateHandle of the current back stack entry
                     navController.currentBackStackEntry?.savedStateHandle?.set(
                         SUBJECT_ARG_KEY,
                         subject
                     )
+                    // T0: Capture start before setup work
+                    val t0 = System.nanoTime()
+                    navigationInitiated.longValue = t0
+                    // Strategy D: SavedStateHandle (data passed via SavedStateHandle, no args in route)
                     navController.navigate(Routes.SecondScreenD)
                     // T1: Capture after navigate() call completes
                     val t1 = System.nanoTime()
-                    setupCompleted.value = t1
+                    setupCompleted.longValue = t1
                 })
         }
 
@@ -83,8 +84,8 @@ fun Nav(
                     val t4 = System.nanoTime()
                     onLatencyMeasured?.invoke(
                         LatencyMeasurement(
-                            navigationInitiated = navigationInitiated.value,
-                            setupCompleted = setupCompleted.value,
+                            navigationInitiated = navigationInitiated.longValue,
+                            setupCompleted = setupCompleted.longValue,
                             destinationScreenEntered = t2,
                             objectRetrieved = t3,
                             firstFrameDispatched = t4
