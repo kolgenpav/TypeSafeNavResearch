@@ -44,11 +44,12 @@ fun Nav(
         composable<Routes.FirstScreen> {
             FirstScreen(
                 onNavigateForward = { subject ->
+                    // Save the Subject to the repository and get its ID
+                    val saved = SubjectRepository.add(subject)
                     // T0: Capture start before setup work
                     val t0 = System.nanoTime()
                     navigationInitiated.longValue = t0
                     // Strategy A: Retrieval strategy (data saved to a repository, ID passed via route arguments)
-                    val saved = SubjectRepository.add(subject)
                     navController.navigate(Routes.SecondScreenA(saved.id))
                     // T1: Capture after navigate() completes
                     val t1 = System.nanoTime()
