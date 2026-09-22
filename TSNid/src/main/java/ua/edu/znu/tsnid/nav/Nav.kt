@@ -1,5 +1,6 @@
 ﻿package ua.edu.znu.tsnid.nav
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -49,11 +50,13 @@ fun Nav(
                     // T0: Capture start before setup work
                     val t0 = System.nanoTime()
                     navigationInitiated.longValue = t0
+                    Log.d("MResearch", "FirstScreen: Before navigate() call, subject id=${subject.id}, name=${subject.name}")
                     // Strategy A: Retrieval strategy (data saved to a repository, ID passed via route arguments)
                     navController.navigate(Routes.SecondScreenA(saved.id))
                     // T1: Capture after navigate() completes
                     val t1 = System.nanoTime()
                     setupCompleted.longValue = t1
+                    Log.d("MResearch", "FirstScreen: After navigate() call, subject id=${subject.id}, name=${subject.name}, navigate latency=${t1 - t0} ns")
                 })
         }
 
@@ -61,12 +64,13 @@ fun Nav(
         composable<Routes.SecondScreenA> { backStackEntry ->
             // T2: Capture when SecondScreen composable starts
             val t2 = System.nanoTime()
+            Log.d("MResearch", "SecondScreen: Before retrieving subject from backStackEntry, arguments=${backStackEntry.arguments}, framework rooting latency=${t2 - setupCompleted.longValue} ns")
             // Retrieve the Subject ID from the route arguments.
             val subjectId = backStackEntry.arguments?.getInt("subjectId") ?: -1
             val subject = SubjectRepository.getById(subjectId)
             // T3: Capture after data is retrieved
             val t3 = System.nanoTime()
-            
+            Log.d("MResearch", "SecondScreen: After retrieving subject, subject id=${subject?.id}, name=${subject?.name}, data retrieval latency=${t3 - t2} ns")
             SecondScreen(
                 subject = subject,
                 onNavigateBack = { navController.popBackStack() }
@@ -76,6 +80,7 @@ fun Nav(
                 withFrameNanos {
                     // T4: Capture when first frame is dispatched
                     val t4 = System.nanoTime()
+                    Log.d("MResearch", "SecondScreen: Inside withFrameNanos, first frame dispatched, frame dispatch latency=${t4 - t3} ns")
                     onLatencyMeasured?.invoke(
                         LatencyMeasurement(
                             navigationInitiated = navigationInitiated.longValue,
@@ -85,6 +90,8 @@ fun Nav(
                             firstFrameDispatched = t4
                         )
                     )
+                    val t5 = System.nanoTime()
+                    Log.d("MResearch", "SecondScreen: After invoking onLatencyMeasured, callback latency=${t5 - t4} ns")
                 }
             }
         }
