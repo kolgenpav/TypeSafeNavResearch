@@ -46,14 +46,15 @@ fun Nav(
         composable<Routes.FirstScreen> {
             FirstScreen(
                 onNavigateForward = { subject ->
-                    // T0: Capture start before setup work
-                    val t0 = System.nanoTime()
-                    navigationInitiated.value = t0
-                    // Strategy D: SavedStateHandle (data passed via SavedStateHandle, no args in route)
+                    // Save the Subject object in the SavedStateHandle of the current back stack entry
                     navController.currentBackStackEntry?.savedStateHandle?.set(
                         SUBJECT_ARG_KEY,
                         subject
                     )
+                    // T0: Capture start before setup work
+                    val t0 = System.nanoTime()
+                    navigationInitiated.value = t0
+                    // Strategy D: SavedStateHandle (data passed via SavedStateHandle, no args in route)
                     navController.navigate(Routes.SecondScreenD)
                     // T1: Capture after navigate() call completes
                     val t1 = System.nanoTime()
