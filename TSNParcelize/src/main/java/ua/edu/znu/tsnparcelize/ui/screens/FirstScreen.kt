@@ -65,7 +65,7 @@ fun FirstScreen(
                         id = 1,
                         name = subjectName.value,
                         isChecked = isSubjectChecked.value,
-                        data = ByteArray(10000), // Simulate some payload data to make parcelize more realistic
+                        data = ByteArray(0), // Simulate some payload data to make parcelize more realistic
                         category = Category(id = 1, name = categoryName.value)
                     )
                 )

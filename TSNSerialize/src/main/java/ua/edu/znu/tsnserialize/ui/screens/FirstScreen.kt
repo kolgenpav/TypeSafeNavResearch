@@ -69,7 +69,7 @@ fun FirstScreen(
                         // Simulate some payload data to make serialization more realistic
                         // Use the array filled with zeros for deterministic Subject instance
                         // JSON representation size (JSON encoding uses Base64 encoding for byte arrays)
-                        data = ByteArray(10000),
+                        data = ByteArray(0),
                         category = Category(id = 1, name = categoryName.value)
                     )
                 )
