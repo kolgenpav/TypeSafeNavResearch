@@ -18,7 +18,7 @@ data class LatencyMeasurement(
     val objectRetrieved: Long,       // T3: Data fully retrieved/deserialized
     val firstFrameDispatched: Long   // T4: First Choreographer frame dispatch
 ) {
-    // Derived latency metrics (calculated from timing points)
+    // Derived latency metrics (calculated from timestamps)
     val setupLatency: Long get() = setupCompleted - navigationInitiated // M1
     val frameworkRoutingLatency: Long get() = destinationScreenEntered - setupCompleted // M2
     val objectRetrievalLatency: Long get() = objectRetrieved - destinationScreenEntered // M3
